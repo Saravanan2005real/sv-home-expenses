@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Suryavin Veedu — Expense Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="mobile-shell">
+    <!-- Sticky Top Bar -->
+    <header class="app-topbar">
+      <div class="brand-row">
+        <div class="brand-icon">SV</div>
+        <div class="brand-text">
+          <h1>Suryavin Veedu</h1>
+          <p>Saravanan • Surya • Ram • Sathish</p>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <button type="button" class="sync-pill" id="btnOpenDriveModal">
+          <span class="sync-dot" id="syncDot"></span>
+          <span id="syncStatusText">Drive Synced</span>
+        </button>
+        <button type="button" class="icon-btn" id="btnRefreshSync" title="Sync with Google Drive">
+          ↻
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Screen Content -->
+    <main class="screen-content">
+
+      <!-- ================================================================ -->
+      <!-- SCREEN 1: HOME (BALANCES & WHO SHOULD PAY WHOM)                  -->
+      <!-- ================================================================ -->
+      <section class="screen-section active" id="screenHome">
+        <!-- Hero Card -->
+        <div class="hero-card">
+          <div class="hero-top">
+            <div>
+              <div class="hero-label">Total House Expenses</div>
+              <div class="hero-total" id="heroTotalSpent">₹0.00</div>
+            </div>
+            <span class="hero-badge" id="heroEntryCount">0 entries</span>
+          </div>
+          <div class="hero-actions">
+            <button type="button" class="hero-btn hero-btn-primary" id="btnHeroAddExpense">
+              <span>➕ Add Expense</span>
+            </button>
+            <button type="button" class="hero-btn hero-btn-secondary" id="btnHeroSettleUp">
+              <span>🤝 Settle Payment</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Who Should Pay Whom Section -->
+        <div class="section-header">
+          <div class="section-title">🤝 Who Should Pay Whom</div>
+          <button type="button" class="pill-toggle-btn" id="btnToggleDebtMode">
+            Simplified Split
+          </button>
+        </div>
+        <div id="whoPaysWhomList" class="debt-list">
+          <!-- Populated by app.js -->
+        </div>
+
+        <!-- 4 Roommates Balance Cards (2x2 Mobile Grid) -->
+        <div class="section-header">
+          <div class="section-title">🏠 Roommate Balances</div>
+        </div>
+        <div class="roommates-grid" id="memberStatsGrid">
+          <!-- Populated by app.js -->
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- SCREEN 2: ADD EXPENSE (FAST MOBILE FORM)                         -->
+      <!-- ================================================================ -->
+      <section class="screen-section" id="screenAdd">
+        <form id="expenseForm">
+          <!-- Big Amount Input -->
+          <div class="amount-hero-box">
+            <div class="amount-hero-label">Enter Expense Amount</div>
+            <div class="amount-input-wrap">
+              <span class="currency-symbol">₹</span>
+              <input
+                type="number"
+                 inputmode="decimal"
+                id="expenseAmount"
+                class="amount-big-input"
+                placeholder="0"
+                min="0.01"
+                step="0.01"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Reason & Quick Chips -->
+          <div class="surface-card">
+            <div class="field-block">
+              <label class="field-label" for="expenseReason">
+                <span>What was this expense for?</span>
+              </label>
+              <input
+                type="text"
+                id="expenseReason"
+                class="modern-input"
+                placeholder="e.g. Shampoo, Groceries, Dinner..."
+                required
+              />
+              <div class="chips-scroll">
+                <button type="button" class="quick-chip reason-chip" data-reason="Groceries / Vegetables">🛒 Groceries</button>
+                <button type="button" class="quick-chip reason-chip" data-reason="Shampoo / Soap">🧴 Shampoo</button>
+                <button type="button" class="quick-chip reason-chip" data-reason="Milk / Water Can">🥛 Milk & Water</button>
+                <button type="button" class="quick-chip reason-chip" data-reason="Dinner / Food">🍛 Food</button>
+                <button type="button" class="quick-chip reason-chip" data-reason="Electricity / WiFi">💡 Bills & WiFi</button>
+                <button type="button" class="quick-chip reason-chip" data-reason="Cooking Gas / Cylinder">🔥 Gas</button>
+              </div>
+            </div>
+
+            <!-- Date -->
+            <div class="field-block" style="margin-bottom: 0;">
+              <label class="field-label" for="expenseDate">Date</label>
+              <input type="date" id="expenseDate" class="modern-input" required />
+            </div>
+          </div>
+
+          <!-- Who Paid? (2x2 Touch Grid) -->
+          <div class="surface-card">
+            <div class="field-label">
+              <span>Who Paid the Bill?</span>
+              <span id="selectedPayerLabel" style="color: var(--primary);">Saravanan</span>
+            </div>
+            <div class="member-touch-grid" id="payerSelector">
+              <!-- Populated by app.js -->
+            </div>
+          </div>
+
+          <!-- Split Between Whom? (2x2 Touch Grid with Live Per-Person Cost) -->
+          <div class="surface-card">
+            <div class="field-label">
+              <span>Split Between Whom? (Tap to toggle)</span>
+              <button type="button" class="pill-toggle-btn" id="btnSelectAll4">Select All 4</button>
+            </div>
+            <div class="member-touch-grid" id="involvedSelector" style="margin-bottom: 12px;">
+              <!-- Populated by app.js -->
+            </div>
+
+            <!-- Live Calculation Summary -->
+            <div class="live-split-banner">
+              <div class="live-split-top">
+                <span id="splitFormulaText">Splitting equally among 4 members</span>
+                <span id="splitPerPersonText">₹0.00 / each</span>
+              </div>
+              <div class="live-split-sub" id="splitBreakdownText">
+                Enter an amount above to see who owes whom.
+              </div>
+            </div>
+
+            <button type="submit" class="btn-submit-main">
+              ✓ Save Expense & Split
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- SCREEN 3: SETTLE UP (RECORD PAYMENT & MINUS COST)                -->
+      <!-- ================================================================ -->
+      <section class="screen-section" id="screenSettle">
+        <div class="surface-card">
+          <div class="section-header" style="margin-top: 0;">
+            <div>
+              <div class="section-title">✅ Record a Payment</div>
+              <p style="font-size: 0.76rem; color: var(--text-secondary); margin-top: 2px;">
+                When one roommate pays another back, save it here to minus their balance.
+              </p>
+            </div>
+          </div>
+
+          <form id="settlementForm" style="margin-top: 14px;">
+            <div class="filter-row-2 field-block">
+              <div>
+                <label class="field-label" for="settleFrom">Who Paid?</label>
+                <select id="settleFrom" class="modern-input" required>
+                  <option value="Saravanan">Saravanan</option>
+                  <option value="Surya">Surya</option>
+                  <option value="Ram">Ram</option>
+                  <option value="Sathish">Sathish</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="settleTo">Paid To Whom?</label>
+                <select id="settleTo" class="modern-input" required>
+                  <option value="Ram">Ram</option>
+                  <option value="Surya">Surya</option>
+                  <option value="Saravanan">Saravanan</option>
+                  <option value="Sathish">Sathish</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="filter-row-2 field-block">
+              <div>
+                <label class="field-label" for="settleAmount">Amount Paid (₹)</label>
+                <input
+                  type="number"
+                  inputmode="decimal"
+                  id="settleAmount"
+                  class="modern-input"
+                  placeholder="e.g. 100"
+                  min="0.01"
+                  step="0.01"
+                  required
+                />
+              </div>
+              <div>
+                <label class="field-label" for="settleDate">Date</label>
+                <input type="date" id="settleDate" class="modern-input" required />
+              </div>
+            </div>
+
+            <div class="field-block">
+              <label class="field-label" for="settleNote">Note (Optional)</label>
+              <input
+                type="text"
+                id="settleNote"
+                class="modern-input"
+                placeholder="e.g. Paid via GPay / Cash"
+              />
+            </div>
+
+            <button type="submit" class="btn-submit-main btn-submit-emerald">
+              ✓ Record Payment & Minus Balance
+            </button>
+          </form>
+        </div>
+
+        <!-- Quick Pending Debts List on Settle Screen too -->
+        <div class="section-header">
+          <div class="section-title">💡 Tap a Balance to Auto-Fill Above</div>
+        </div>
+        <div id="settleScreenQuickDebts" class="debt-list">
+          <!-- Populated by app.js -->
+        </div>
+      </section>
+
+      <!-- ================================================================ -->
+      <!-- SCREEN 4: ANALYTICS & ALL EXPENSES IN ORDER (FOR CHECKING)       -->
+      <!-- ================================================================ -->
+      <section class="screen-section" id="screenAnalytics">
+        <!-- 3 Mini KPIs -->
+        <div class="kpi-strip-3">
+          <div class="mini-kpi">
+            <div class="mini-kpi-label">Total Spent</div>
+            <div class="mini-kpi-val" id="kpiTotalSpent">₹0</div>
+          </div>
+          <div class="mini-kpi">
+            <div class="mini-kpi-label">Paid Back</div>
+            <div class="mini-kpi-val" id="kpiTotalSettled" style="color: var(--emerald);">₹0</div>
+          </div>
+          <div class="mini-kpi">
+            <div class="mini-kpi-label">Entries</div>
+            <div class="mini-kpi-val" id="kpiEntryCount">0</div>
+          </div>
+        </div>
+
+        <!-- Member-Wise Calculation Check (Mobile Cards) -->
+        <div class="surface-card">
+          <div class="section-header" style="margin-top: 0;">
+            <div class="section-title">📋 Member Calculation Check</div>
+          </div>
+          <div class="audit-cards-list" id="memberAuditList">
+            <!-- Populated by app.js -->
+          </div>
+        </div>
+
+        <!-- Ordered Expenses & Payments Feed -->
+        <div class="surface-card">
+          <div class="section-header" style="margin-top: 0;">
+            <div class="section-title">🧾 All Expenses in Order</div>
+            <button type="button" class="pill-toggle-btn" id="btnExportCSV">⬇ CSV</button>
+          </div>
+
+          <!-- Mobile Filter Stack -->
+          <div class="filter-stack">
+            <input
+              type="text"
+              id="filterSearch"
+              class="modern-input"
+              placeholder="🔍 Search reason (e.g. Shampoo, Dinner)..."
+              style="padding: 10px 12px; font-size: 0.86rem;"
+            />
+            <div class="filter-row-2">
+              <select id="filterMember" class="modern-input" style="padding: 9px 10px; font-size: 0.82rem;">
+                <option value="ALL">All 4 Members</option>
+                <option value="Saravanan">Saravanan</option>
+                <option value="Surya">Surya</option>
+                <option value="Ram">Ram</option>
+                <option value="Sathish">Sathish</option>
+              </select>
+              <select id="filterType" class="modern-input" style="padding: 9px 10px; font-size: 0.82rem;">
+                <option value="ALL">All Entries</option>
+                <option value="expense">Expenses Only</option>
+                <option value="settlement">Payments Only</option>
+              </select>
+            </div>
+            <div class="filter-row-2">
+              <select id="filterOrder" class="modern-input" style="padding: 9px 10px; font-size: 0.82rem;">
+                <option value="DESC">Newest First</option>
+                <option value="ASC">Oldest First (#1, #2...)</option>
+              </select>
+              <button type="button" class="modern-input" id="btnClearFilters" style="padding: 9px 10px; font-size: 0.82rem; background: var(--bg-muted); cursor: pointer;">
+                Reset Filters
+              </button>
+            </div>
+          </div>
+
+          <!-- Ordered Mobile Card Feed -->
+          <div class="history-feed" id="ledgerFeedList">
+            <!-- Populated by app.js -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Fixed Mobile Bottom Navigation Bar -->
+    <nav class="bottom-navbar" aria-label="Bottom Navigation">
+      <div class="bottom-nav-inner">
+        <button type="button" class="bnav-item active" data-screen="screenHome">
+          <span class="bnav-icon">🏠</span>
+          <span class="bnav-label">Home</span>
+        </button>
+        <button type="button" class="bnav-item" data-screen="screenAdd">
+          <span class="bnav-icon">➕</span>
+          <span class="bnav-label">Add Expense</span>
+        </button>
+        <button type="button" class="bnav-item" data-screen="screenSettle">
+          <span class="bnav-icon">🤝</span>
+          <span class="bnav-label">Settle Up</span>
+        </button>
+        <button type="button" class="bnav-item" data-screen="screenAnalytics">
+          <span class="bnav-icon">📊</span>
+          <span class="bnav-label">Analytics</span>
+          <span class="bnav-badge" id="totalEntriesBadge">0</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+  <!-- GOOGLE DRIVE SYNC BOTTOM SHEET MODAL -->
+  <div class="modal-backdrop" id="driveModalBackdrop">
+    <div class="modal-sheet">
+      <div class="section-header" style="margin-top: 0; margin-bottom: 12px;">
+        <div class="section-title">☁️ Google Drive Cloud Sync</div>
+        <button type="button" class="pill-toggle-btn" id="btnCloseDriveModal">✕ Close</button>
+      </div>
+      <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 12px;">
+        Your expenses are automatically synced with your Google Sheet in Google Drive.
+      </p>
+      <div class="field-block">
+        <label class="field-label" for="driveWebAppUrlInput">Apps Script Web App URL</label>
+        <input
+          type="url"
+          id="driveWebAppUrlInput"
+          class="modern-input"
+          placeholder="https://script.google.com/macros/s/.../exec"
+          style="font-size: 0.8rem;"
+        />
+      </div>
+      <div class="filter-row-2">
+        <button type="button" class="btn-submit-main" id="btnSaveDriveUrl" style="padding: 12px; font-size: 0.85rem;">
+          Save & Sync
+        </button>
+        <button type="button" class="modern-input" id="btnPushLocalToDrive" style="padding: 12px; font-size: 0.82rem; background: var(--bg-muted); cursor: pointer;">
+          ⬆ Push Local Data
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

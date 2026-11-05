@@ -1,0 +1,11 @@
+{
+  "name": "suryavin-veedu-expense-tracker",
+  "version": "1.0.0",
+  "description": "Personalized 4-member home expense tracker for Saravanan, Surya, Ram & Sathish with Google Drive sync",
+  "private": true,
+  "scripts": {
+    "dev": "npx --yes serve . -l 3000",
+    "start": "npx --yes serve . -l 3000"
+  }
+}
+
